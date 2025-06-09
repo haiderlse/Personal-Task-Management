@@ -1,0 +1,504 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Personal Task Management App</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f4f7f6;
+        }
+        .kanban-column {
+            min-height: 400px;
+        }
+        .task-card {
+            cursor: grab;
+        }
+        .task-card:active {
+            cursor: grabbing;
+        }
+        .priority-high { border-left: 4px solid #ef4444; }
+        .priority-medium { border-left: 4px solid #f97316; }
+        .priority-low { border-left: 4px solid #3b82f6; }
+        .toast {
+            visibility: hidden;
+            opacity: 0;
+            transition: opacity 0.5s, visibility 0.5s, transform 0.5s;
+        }
+        .toast.show {
+            visibility: visible;
+            opacity: 1;
+            transform: translateY(0);
+        }
+    </style>
+</head>
+<body class="bg-gray-100 text-gray-800">
+
+    <!-- Toast Notification -->
+    <div id="toast" class="toast fixed bottom-5 right-5 bg-gray-800 text-white px-6 py-3 rounded-lg shadow-xl transform translate-y-10">
+        <p id="toast-message">Task saved!</p>
+    </div>
+
+    <!-- Hidden file input for CSV import -->
+    <input type="file" id="csv-file-input" class="hidden" accept=".csv">
+
+    <div class="container mx-auto p-4 md:p-8">
+        <!-- Header -->
+        <header class="flex flex-col md:flex-row justify-between items-center mb-8 pb-4 border-b border-gray-300">
+            <div>
+                <h1 class="text-3xl font-bold text-gray-900">My Task Manager</h1>
+                <p class="text-gray-600 mt-1">Capture, organize, and execute your tasks.</p>
+                <p id="user-id-display" class="text-xs text-gray-500 mt-2 font-mono"></p>
+            </div>
+            <div class="mt-4 md:mt-0 flex items-center space-x-2">
+                 <button id="import-csv-btn" class="bg-white border border-gray-300 hover:bg-gray-100 text-gray-800 font-bold py-2 px-4 rounded-lg transition-colors shadow">
+                    Import from CSV
+                </button>
+                 <button id="export-csv-btn" class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-lg transition-colors shadow">
+                    Export to CSV
+                </button>
+            </div>
+        </header>
+
+        <div class="flex flex-col lg:flex-row gap-8">
+            <!-- Left Column: Add Task Form -->
+            <div class="lg:w-1/3">
+                <div class="bg-white p-6 rounded-xl shadow-lg">
+                    <h2 class="text-2xl font-semibold mb-4">Add a New Task</h2>
+                    <form id="add-task-form" class="space-y-4">
+                        <div>
+                            <label for="task-title" class="block text-sm font-medium text-gray-700">Task Title</label>
+                            <input type="text" id="task-title" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500" placeholder="e.g., Analyze LP" required>
+                        </div>
+                        <div>
+                            <label for="task-priority" class="block text-sm font-medium text-gray-700">Priority</label>
+                            <select id="task-priority" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                                <option value="High">High</option>
+                                <option value="Medium" selected>Medium</option>
+                                <option value="Low">Low</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label for="task-tags" class="block text-sm font-medium text-gray-700">Tags (comma-separated)</label>
+                            <input type="text" id="task-tags" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500" placeholder="e.g., Pharma, E-Com">
+                        </div>
+                        <div>
+                            <label for="task-due-date" class="block text-sm font-medium text-gray-700">Due Date</label>
+                            <input type="date" id="task-due-date" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                        </div>
+                        <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg transition-colors shadow-md">Add Task</button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Right Column: Task Views -->
+            <div class="lg:w-2/3">
+                <div>
+                    <!-- Tabs -->
+                    <div class="border-b border-gray-200">
+                        <nav class="-mb-px flex space-x-8" aria-label="Tabs">
+                            <button id="tab-kanban" class="tab-btn whitespace-nowrap py-4 px-1 border-b-2 font-medium text-lg border-blue-500 text-blue-600">Kanban Board</button>
+                            <button id="tab-list" class="tab-btn whitespace-nowrap py-4 px-1 border-b-2 font-medium text-lg border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300">Task List</button>
+                        </nav>
+                    </div>
+
+                    <!-- Kanban View -->
+                    <div id="kanban-view" class="tab-content mt-6">
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                            <div class="bg-gray-200 p-4 rounded-lg kanban-column" data-status="Backlog">
+                                <h3 class="font-bold text-lg mb-4 text-gray-700">Backlog</h3>
+                                <div id="kanban-backlog" class="space-y-4"></div>
+                            </div>
+                            <div class="bg-gray-200 p-4 rounded-lg kanban-column" data-status="In Progress">
+                                <h3 class="font-bold text-lg mb-4 text-gray-700">In Progress</h3>
+                                <div id="kanban-inprogress" class="space-y-4"></div>
+                            </div>
+                            <div class="bg-gray-200 p-4 rounded-lg kanban-column" data-status="Done">
+                                <h3 class="font-bold text-lg mb-4 text-gray-700">Done</h3>
+                                <div id="kanban-done" class="space-y-4"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- List View -->
+                    <div id="list-view" class="tab-content mt-6 hidden">
+                         <div class="bg-white p-4 rounded-xl shadow-lg overflow-x-auto">
+                            <table class="w-full text-left">
+                                <thead>
+                                    <tr class="border-b">
+                                        <th class="p-2">Title</th>
+                                        <th class="p-2">Priority</th>
+                                        <th class="p-2">Status</th>
+                                        <th class="p-2">Due Date</th>
+                                        <th class="p-2">Actions</th>
+                                    </tr>
+                                <thead>
+                                <tbody id="task-list-body">
+                                    <!-- Tasks will be rendered here -->
+                                </tbody>
+                            </table>
+                         </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, onAuthStateChanged, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, doc, setDoc, onSnapshot, setLogLevel } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        // --- CONFIG & STATE ---
+        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {};
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+        let tasks = [];
+        let db, auth, userId, tasksDocRef;
+
+        // --- UI ELEMENTS ---
+        const taskForm = document.getElementById('add-task-form');
+        const taskListBody = document.getElementById('task-list-body');
+        const kanbanBacklog = document.getElementById('kanban-backlog');
+        const kanbanInProgress = document.getElementById('kanban-inprogress');
+        const kanbanDone = document.getElementById('kanban-done');
+        const tabKanban = document.getElementById('tab-kanban');
+        const tabList = document.getElementById('tab-list');
+        const kanbanView = document.getElementById('kanban-view');
+        const listView = document.getElementById('list-view');
+        const exportCsvBtn = document.getElementById('export-csv-btn');
+        const importCsvBtn = document.getElementById('import-csv-btn');
+        const csvFileInput = document.getElementById('csv-file-input');
+        const userIdDisplay = document.getElementById('user-id-display');
+
+        // --- FIREBASE INITIALIZATION ---
+        async function initFirebase() {
+            try {
+                const app = initializeApp(firebaseConfig);
+                db = getFirestore(app);
+                auth = getAuth(app);
+                setLogLevel('debug');
+
+                onAuthStateChanged(auth, user => {
+                    if (user) {
+                        userId = user.uid;
+                        userIdDisplay.textContent = `User ID: ${userId}`;
+                        console.log("User is signed in with UID:", userId);
+                        tasksDocRef = doc(db, "artifacts", appId, "users", userId, "task-manager", "taskList");
+                        setupSnapshotListener();
+                    } else {
+                        console.log("User is signed out.");
+                        userIdDisplay.textContent = "Not signed in.";
+                    }
+                });
+
+                if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                    await signInWithCustomToken(auth, __initial_auth_token);
+                } else {
+                    await signInAnonymously(auth);
+                }
+            } catch (error) {
+                console.error("Firebase initialization failed:", error);
+                showToast("Error connecting to the cloud.", "error");
+            }
+        }
+
+        function setupSnapshotListener() {
+            if (!tasksDocRef) return;
+            onSnapshot(tasksDocRef, (doc) => {
+                if (doc.exists()) {
+                    const data = doc.data();
+                    tasks = data.tasks || [];
+                    console.log("Tasks loaded from Firestore:", tasks);
+                } else {
+                    console.log("No existing tasks document. Creating one.");
+                    // Pre-populate with example tasks for first-time users
+                    tasks = [
+                        { id: `task-${Date.now()}-1`, title: 'Analyze LP', priority: 'High', tags: ['Analyst', 'Pharma'], dueDate: '', status: 'Backlog' },
+                        { id: `task-${Date.now()}-2`, title: 'Ask E-Com to make a banner', priority: 'Medium', tags: ['E-Com', 'Marketing'], dueDate: '', status: 'Backlog' }
+                    ];
+                    saveTasksToFirestore(false); // Don't show toast on initial creation
+                }
+                renderAll();
+            }, (error) => {
+                console.error("Error with snapshot listener:", error);
+                showToast("Error listening for real-time updates.", "error");
+            });
+        }
+        
+        async function saveTasksToFirestore(showSuccessToast = true) {
+            if (!tasksDocRef) {
+                showToast("Cannot save: Not connected.", "error");
+                return;
+            }
+            try {
+                await setDoc(tasksDocRef, { tasks: tasks });
+                console.log("Tasks saved to Firestore.");
+                if (showSuccessToast) {
+                    showToast("Progress saved to the cloud!");
+                }
+            } catch (error) {
+                console.error("Error saving tasks to Firestore:", error);
+                showToast("Failed to save tasks.", "error");
+            }
+        }
+
+
+        // --- RENDERING ---
+        function renderAll() {
+            renderListView();
+            renderKanbanView();
+        }
+
+        function renderListView() {
+            taskListBody.innerHTML = '';
+            if (tasks.length === 0) {
+                taskListBody.innerHTML = '<tr><td colspan="5" class="text-center p-4 text-gray-500">No tasks yet. Add one!</td></tr>';
+                return;
+            }
+            tasks.forEach(task => {
+                const row = document.createElement('tr');
+                row.className = 'border-b hover:bg-gray-50';
+                row.innerHTML = `
+                    <td class="p-3">${task.title}</td>
+                    <td class="p-3"><span class="px-2 py-1 text-xs font-semibold rounded-full ${getPriorityClass(task.priority)}">${task.priority}</span></td>
+                    <td class="p-3">${task.status}</td>
+                    <td class="p-3">${task.dueDate || 'N/A'}</td>
+                    <td class="p-3">
+                        <button class="delete-btn text-red-500 hover:text-red-700" data-id="${task.id}">Delete</button>
+                    </td>
+                `;
+                taskListBody.appendChild(row);
+            });
+        }
+
+        function renderKanbanView() {
+            kanbanBacklog.innerHTML = '';
+            kanbanInProgress.innerHTML = '';
+            kanbanDone.innerHTML = '';
+
+            tasks.forEach(task => {
+                const taskCard = document.createElement('div');
+                taskCard.id = task.id;
+                taskCard.className = `task-card bg-white p-4 rounded-lg shadow priority-${task.priority.toLowerCase()}`;
+                taskCard.draggable = true;
+                taskCard.innerHTML = `
+                    <h4 class="font-bold">${task.title}</h4>
+                    <div class="flex flex-wrap gap-2 my-2">
+                        ${(task.tags || []).map(tag => `<span class="bg-blue-100 text-blue-800 text-xs font-semibold px-2 py-1 rounded-full">${tag}</span>`).join('')}
+                    </div>
+                    <p class="text-sm text-gray-500">Due: ${task.dueDate || 'N/A'}</p>
+                    <button class="delete-btn text-xs text-red-500 hover:text-red-700 mt-2" data-id="${task.id}">Delete</button>
+                `;
+
+                if (task.status === 'Backlog') kanbanBacklog.appendChild(taskCard);
+                else if (task.status === 'In Progress') kanbanInProgress.appendChild(taskCard);
+                else if (task.status === 'Done') kanbanDone.appendChild(taskCard);
+            });
+        }
+        
+        // --- TASK MANIPULATION ---
+        function addTask(e) {
+            e.preventDefault();
+            const title = document.getElementById('task-title').value;
+            const priority = document.getElementById('task-priority').value;
+            const tags = document.getElementById('task-tags').value.split(',').map(tag => tag.trim()).filter(Boolean);
+            const dueDate = document.getElementById('task-due-date').value;
+
+            const newTask = {
+                id: `task-${Date.now()}`,
+                title,
+                priority,
+                tags,
+                dueDate,
+                status: 'Backlog'
+            };
+
+            tasks.push(newTask);
+            saveTasksToFirestore();
+            taskForm.reset();
+        }
+
+        function deleteTask(id) {
+            tasks = tasks.filter(task => task.id !== id);
+            saveTasksToFirestore();
+        }
+
+        function updateTaskStatus(id, newStatus) {
+            const task = tasks.find(t => t.id === id);
+            if (task) {
+                task.status = newStatus;
+                saveTasksToFirestore();
+            }
+        }
+        
+        function exportToCSV() {
+            if (tasks.length === 0) {
+                showToast("No tasks to export.", "error");
+                return;
+            }
+            const headers = "ID,Title,Priority,Status,DueDate,Tags\n";
+            const rows = tasks.map(task => 
+                `"${task.id}","${task.title}","${task.priority}","${task.status}","${task.dueDate || ''}","${(task.tags || []).join(';')}"`
+            ).join("\n");
+
+            const csvContent = headers + rows;
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement("a");
+            if (link.download !== undefined) {
+                const url = URL.createObjectURL(blob);
+                link.setAttribute("href", url);
+                link.setAttribute("download", "tasks.csv");
+                link.style.visibility = 'hidden';
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+            }
+        }
+        
+        function handleCsvImport(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const text = e.target.result;
+                try {
+                    const importedTasks = parseCSV(text);
+                    mergeTasks(importedTasks);
+                    saveTasksToFirestore();
+                    showToast(`${importedTasks.length} tasks imported successfully!`);
+                } catch (error) {
+                    console.error("CSV Parsing Error:", error);
+                    showToast("Failed to parse CSV. Please check the format.", "error");
+                }
+            };
+            reader.readAsText(file);
+            event.target.value = ''; // Reset input
+        }
+
+        function parseCSV(text) {
+            const lines = text.split(/\r\n|\n/);
+            const headers = lines[0].split(',').map(h => h.trim());
+            const tasksArr = [];
+            const headerMap = {
+                id: 'ID',
+                title: 'Title',
+                priority: 'Priority',
+                status: 'Status',
+                dueDate: 'DueDate',
+                tags: 'Tags'
+            };
+
+            for (let i = 1; i < lines.length; i++) {
+                if (!lines[i]) continue;
+                const values = lines[i].split('","').map(v => v.replace(/"/g, ''));
+                
+                let task = {};
+                task.id = values[headers.indexOf(headerMap.id)];
+                task.title = values[headers.indexOf(headerMap.title)];
+                task.priority = values[headers.indexOf(headerMap.priority)];
+                task.status = values[headers.indexOf(headerMap.status)];
+                task.dueDate = values[headers.indexOf(headerMap.dueDate)];
+                const tagsStr = values[headers.indexOf(headerMap.tags)];
+                task.tags = tagsStr ? tagsStr.split(';') : [];
+                tasksArr.push(task);
+            }
+            return tasksArr;
+        }
+
+        function mergeTasks(importedTasks) {
+            const tasksMap = new Map(tasks.map(task => [task.id, task]));
+            importedTasks.forEach(importedTask => {
+                tasksMap.set(importedTask.id, importedTask);
+            });
+            tasks = Array.from(tasksMap.values());
+        }
+
+        // --- HELPERS ---
+        function getPriorityClass(priority) {
+            switch (priority) {
+                case 'High': return 'bg-red-100 text-red-800';
+                case 'Medium': return 'bg-orange-100 text-orange-800';
+                case 'Low': return 'bg-blue-100 text-blue-800';
+                default: return 'bg-gray-100 text-gray-800';
+            }
+        }
+
+        function showToast(message, type = "success") {
+            const toast = document.getElementById("toast");
+            const toastMessage = document.getElementById("toast-message");
+            toastMessage.textContent = message;
+            toast.className = `toast show fixed bottom-5 right-5 text-white px-6 py-3 rounded-lg shadow-xl transform translate-y-10 ${type === 'error' ? 'bg-red-600' : 'bg-gray-800'}`;
+            setTimeout(() => {
+                toast.classList.remove("show");
+            }, 3000);
+        }
+
+        // --- EVENT LISTENERS ---
+        taskForm.addEventListener('submit', addTask);
+        
+        document.body.addEventListener('click', e => {
+            if (e.target.classList.contains('delete-btn')) {
+                // Using a simple confirm dialog for now. A custom modal would be better.
+                if(window.confirm("Are you sure you want to delete this task?")){
+                    deleteTask(e.target.dataset.id);
+                }
+            }
+        });
+        
+        // Tab switching
+        tabKanban.addEventListener('click', () => {
+            kanbanView.classList.remove('hidden');
+            listView.classList.add('hidden');
+            tabKanban.className = 'tab-btn whitespace-nowrap py-4 px-1 border-b-2 font-medium text-lg border-blue-500 text-blue-600';
+            tabList.className = 'tab-btn whitespace-nowrap py-4 px-1 border-b-2 font-medium text-lg border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300';
+        });
+
+        tabList.addEventListener('click', () => {
+            kanbanView.classList.add('hidden');
+            listView.classList.remove('hidden');
+            tabList.className = 'tab-btn whitespace-nowrap py-4 px-1 border-b-2 font-medium text-lg border-blue-500 text-blue-600';
+            tabKanban.className = 'tab-btn whitespace-nowrap py-4 px-1 border-b-2 font-medium text-lg border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300';
+        });
+        
+        exportCsvBtn.addEventListener('click', exportToCSV);
+        importCsvBtn.addEventListener('click', () => csvFileInput.click());
+        csvFileInput.addEventListener('change', handleCsvImport);
+
+        // Drag and Drop
+        let draggedItemId = null;
+        document.addEventListener('dragstart', e => {
+            if (e.target.classList.contains('task-card')) {
+                draggedItemId = e.target.id;
+                e.target.style.opacity = '0.5';
+            }
+        });
+
+        document.addEventListener('dragend', e => {
+            if (e.target.classList.contains('task-card')) {
+                draggedItemId = null;
+                e.target.style.opacity = '1';
+            }
+        });
+        
+        document.addEventListener('dragover', e => {
+            e.preventDefault();
+        });
+
+        document.addEventListener('drop', e => {
+            e.preventDefault();
+            const column = e.target.closest('.kanban-column');
+            if (column && draggedItemId) {
+                const newStatus = column.dataset.status;
+                updateTaskStatus(draggedItemId, newStatus);
+            }
+        });
+
+        // --- INITIALIZATION ---
+        initFirebase();
+    </script>
+</body>
+</html>
