@@ -712,6 +712,24 @@
                         </form>
                     </div>
                 </div>
+
+                <!-- Search and Filter -->
+                <div class="card" style="margin-top: 1rem;">
+                    <div class="card-body">
+                        <h2>Search & Filter</h2>
+                        <div class="form-group">
+                            <input type="text" id="search-input" class="form-input" placeholder="Search tasks...">
+                        </div>
+                        <div class="form-group" style="margin-bottom: 0;">
+                            <select id="filter-priority" class="form-select">
+                                <option value="">All Priorities</option>
+                                <option value="High">High Priority</option>
+                                <option value="Medium">Medium Priority</option>
+                                <option value="Low">Low Priority</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
             </div>
 
             <!-- Main Content: Task Views -->
@@ -781,6 +799,8 @@
         // --- CONFIG & STATE ---
         let tasks = [];
         let currentProject = 'personal';
+        let searchQuery = '';
+        let filterPriority = '';
 
         // --- UI ELEMENTS ---
         const taskForm = document.getElementById('add-task-form');
@@ -799,6 +819,8 @@
         const userIdDisplay = document.getElementById('user-id-display');
         const taskModal = document.getElementById('task-modal');
         const projectTabs = document.getElementById('project-tabs');
+        const searchInput = document.getElementById('search-input');
+        const filterPrioritySelect = document.getElementById('filter-priority');
 
         // --- LOCAL STORAGE FUNCTIONS ---
         function saveTasksToStorage() {
@@ -938,7 +960,23 @@
         }
 
         function getFilteredTasks() {
-            return tasks.filter(task => task.project === currentProject);
+            let filteredTasks = tasks.filter(task => task.project === currentProject);
+            
+            // Apply search filter
+            if (searchQuery) {
+                filteredTasks = filteredTasks.filter(task => 
+                    task.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                    (task.description && task.description.toLowerCase().includes(searchQuery.toLowerCase())) ||
+                    (task.tags && task.tags.some(tag => tag.toLowerCase().includes(searchQuery.toLowerCase())))
+                );
+            }
+            
+            // Apply priority filter
+            if (filterPriority) {
+                filteredTasks = filteredTasks.filter(task => task.priority === filterPriority);
+            }
+            
+            return filteredTasks;
         }
 
         function updateTaskCounts() {
@@ -989,6 +1027,7 @@
             if (taskIndex !== -1) {
                 tasks[taskIndex] = { ...tasks[taskIndex], ...taskData };
                 saveTasksToStorage();
+                renderAll(); // Re-render to show changes immediately
                 showToast('Task updated successfully!');
             }
         }
@@ -998,6 +1037,7 @@
             
             tasks = tasks.filter(task => task.id !== id);
             saveTasksToStorage();
+            renderAll(); // Re-render to show changes immediately
             showToast('Task deleted successfully!');
         }
 
@@ -1006,6 +1046,7 @@
             if (task) {
                 task.status = newStatus;
                 saveTasksToStorage();
+                renderAll(); // Re-render to show changes immediately
                 showToast(`Task moved to ${newStatus}!`);
             }
         }
@@ -1057,7 +1098,7 @@
             });
             document.querySelector(`[data-project="${project}"]`).classList.add('active');
             
-            renderAll();
+            renderAll(); // Re-render for new project
         }
         
         function exportToCSV() {
@@ -1225,6 +1266,17 @@
             if (e.target.classList.contains('project-tab')) {
                 switchProject(e.target.dataset.project);
             }
+        });
+
+        // Search and filter
+        searchInput.addEventListener('input', (e) => {
+            searchQuery = e.target.value;
+            renderAll();
+        });
+
+        filterPrioritySelect.addEventListener('change', (e) => {
+            filterPriority = e.target.value;
+            renderAll();
         });
         
         // Tab switching
