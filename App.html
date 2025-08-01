@@ -3,144 +3,792 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Personal Task Management App</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <title>Asana Clone - Personal Task Management</title>
     <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
         body {
-            font-family: 'Inter', sans-serif;
-            background-color: #f4f7f6;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background-color: #fafbfc;
+            color: #151b26;
+            line-height: 1.5;
         }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 1rem;
+        }
+        
+        /* Header Styles */
+        .header {
+            background: #fff;
+            border-bottom: 1px solid #e1e8ed;
+            padding: 1rem 0;
+            margin-bottom: 2rem;
+        }
+        
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+        
+        .header h1 {
+            font-size: 1.875rem;
+            font-weight: 700;
+            color: #151b26;
+        }
+        
+        .header p {
+            color: #626f86;
+            margin-top: 0.25rem;
+        }
+        
+        .header-actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+        
+        /* Button Styles */
+        .btn {
+            padding: 0.5rem 1rem;
+            border: none;
+            border-radius: 0.375rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .btn-primary {
+            background: #0066cc;
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: #0052a3;
+        }
+        
+        .btn-secondary {
+            background: white;
+            color: #626f86;
+            border: 1px solid #e1e8ed;
+        }
+        
+        .btn-secondary:hover {
+            background: #f6f8fa;
+        }
+        
+        .btn-success {
+            background: #0ca789;
+            color: white;
+        }
+        
+        .btn-success:hover {
+            background: #0a9472;
+        }
+        
+        .btn-danger {
+            background: #ff5a5a;
+            color: white;
+        }
+        
+        .btn-danger:hover {
+            background: #e14747;
+        }
+        
+        /* Layout */
+        .main-layout {
+            display: flex;
+            gap: 2rem;
+            flex-wrap: wrap;
+        }
+        
+        .sidebar {
+            flex: 0 0 320px;
+            min-width: 320px;
+        }
+        
+        .main-content {
+            flex: 1;
+            min-width: 600px;
+        }
+        
+        /* Card Styles */
+        .card {
+            background: white;
+            border-radius: 0.5rem;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            border: 1px solid #e1e8ed;
+        }
+        
+        .card-header {
+            padding: 1.5rem 1.5rem 0 1.5rem;
+            border-bottom: 1px solid #e1e8ed;
+            margin-bottom: 1.5rem;
+        }
+        
+        .card-body {
+            padding: 1.5rem;
+        }
+        
+        .card h2 {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+        }
+        
+        /* Form Styles */
+        .form-group {
+            margin-bottom: 1rem;
+        }
+        
+        .form-label {
+            display: block;
+            font-weight: 500;
+            margin-bottom: 0.5rem;
+            color: #151b26;
+        }
+        
+        .form-input, .form-select, .form-textarea {
+            width: 100%;
+            padding: 0.5rem 0.75rem;
+            border: 1px solid #e1e8ed;
+            border-radius: 0.375rem;
+            font-size: 0.875rem;
+            transition: border-color 0.2s;
+        }
+        
+        .form-input:focus, .form-select:focus, .form-textarea:focus {
+            outline: none;
+            border-color: #0066cc;
+            box-shadow: 0 0 0 3px rgba(0, 102, 204, 0.1);
+        }
+        
+        .form-textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+        
+        /* Project Selector */
+        .project-selector {
+            margin-bottom: 1.5rem;
+        }
+        
+        .project-tabs {
+            display: flex;
+            border-bottom: 1px solid #e1e8ed;
+            margin-bottom: 1.5rem;
+        }
+        
+        .project-tab {
+            padding: 0.75rem 1rem;
+            border: none;
+            background: none;
+            cursor: pointer;
+            font-weight: 500;
+            color: #626f86;
+            border-bottom: 2px solid transparent;
+            transition: all 0.2s;
+        }
+        
+        .project-tab.active {
+            color: #0066cc;
+            border-bottom-color: #0066cc;
+        }
+        
+        .project-tab:hover {
+            color: #151b26;
+        }
+        
+        /* Tabs */
+        .tabs {
+            border-bottom: 1px solid #e1e8ed;
+            margin-bottom: 1.5rem;
+        }
+        
+        .tab-nav {
+            display: flex;
+            gap: 2rem;
+        }
+        
+        .tab-btn {
+            padding: 1rem 0;
+            border: none;
+            background: none;
+            cursor: pointer;
+            font-weight: 500;
+            color: #626f86;
+            border-bottom: 2px solid transparent;
+            transition: all 0.2s;
+        }
+        
+        .tab-btn.active {
+            color: #0066cc;
+            border-bottom-color: #0066cc;
+        }
+        
+        .tab-content {
+            display: none;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        /* Kanban Board */
+        .kanban-board {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+        }
+        
         .kanban-column {
-            min-height: 400px;
+            background: #f6f8fa;
+            border-radius: 0.5rem;
+            padding: 1rem;
+            min-height: 500px;
         }
+        
+        .kanban-header {
+            font-weight: 600;
+            margin-bottom: 1rem;
+            color: #151b26;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        
+        .task-count {
+            background: #e1e8ed;
+            color: #626f86;
+            padding: 0.25rem 0.5rem;
+            border-radius: 1rem;
+            font-size: 0.75rem;
+            font-weight: 500;
+        }
+        
+        .kanban-tasks {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+        
+        /* Task Cards */
         .task-card {
+            background: white;
+            border-radius: 0.375rem;
+            padding: 1rem;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            border: 1px solid #e1e8ed;
             cursor: grab;
+            transition: all 0.2s;
         }
+        
+        .task-card:hover {
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            transform: translateY(-1px);
+        }
+        
         .task-card:active {
             cursor: grabbing;
         }
-        .priority-high { border-left: 4px solid #ef4444; }
-        .priority-medium { border-left: 4px solid #f97316; }
-        .priority-low { border-left: 4px solid #3b82f6; }
-        .toast {
-            visibility: hidden;
-            opacity: 0;
-            transition: opacity 0.5s, visibility 0.5s, transform 0.5s;
+        
+        .task-card.dragging {
+            opacity: 0.5;
+            transform: rotate(5deg);
         }
-        .toast.show {
-            visibility: visible;
+        
+        .task-title {
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            color: #151b26;
+        }
+        
+        .task-description {
+            color: #626f86;
+            font-size: 0.875rem;
+            margin-bottom: 0.75rem;
+            line-height: 1.4;
+        }
+        
+        .task-meta {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+        }
+        
+        .task-tags {
+            display: flex;
+            gap: 0.25rem;
+            flex-wrap: wrap;
+        }
+        
+        .task-tag {
+            background: #e3f2fd;
+            color: #1565c0;
+            padding: 0.125rem 0.5rem;
+            border-radius: 0.25rem;
+            font-size: 0.75rem;
+            font-weight: 500;
+        }
+        
+        .task-priority {
+            padding: 0.125rem 0.5rem;
+            border-radius: 0.25rem;
+            font-size: 0.75rem;
+            font-weight: 500;
+        }
+        
+        .priority-high {
+            background: #ffebee;
+            color: #c62828;
+            border-left: 3px solid #f44336;
+        }
+        
+        .priority-medium {
+            background: #fff3e0;
+            color: #ef6c00;
+            border-left: 3px solid #ff9800;
+        }
+        
+        .priority-low {
+            background: #e8f5e8;
+            color: #2e7d32;
+            border-left: 3px solid #4caf50;
+        }
+        
+        .task-due-date {
+            font-size: 0.75rem;
+            color: #626f86;
+        }
+        
+        .task-actions {
+            display: flex;
+            gap: 0.5rem;
+            margin-top: 0.75rem;
+        }
+        
+        .task-action-btn {
+            padding: 0.25rem 0.5rem;
+            border: none;
+            background: none;
+            color: #626f86;
+            cursor: pointer;
+            border-radius: 0.25rem;
+            font-size: 0.75rem;
+            transition: all 0.2s;
+        }
+        
+        .task-action-btn:hover {
+            background: #f6f8fa;
+            color: #151b26;
+        }
+        
+        .task-action-btn.delete:hover {
+            background: #ffebee;
+            color: #c62828;
+        }
+        
+        /* Table Styles */
+        .table-container {
+            background: white;
+            border-radius: 0.5rem;
+            overflow: hidden;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            border: 1px solid #e1e8ed;
+        }
+        
+        .table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        .table th {
+            background: #f6f8fa;
+            padding: 0.75rem;
+            text-align: left;
+            font-weight: 600;
+            color: #151b26;
+            border-bottom: 1px solid #e1e8ed;
+        }
+        
+        .table td {
+            padding: 0.75rem;
+            border-bottom: 1px solid #e1e8ed;
+        }
+        
+        .table tr:hover {
+            background: #f6f8fa;
+        }
+        
+        /* Modal Styles */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s;
+        }
+        
+        .modal-overlay.show {
             opacity: 1;
+            visibility: visible;
+        }
+        
+        .modal {
+            background: white;
+            border-radius: 0.5rem;
+            max-width: 600px;
+            width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+            transform: scale(0.9);
+            transition: transform 0.3s;
+        }
+        
+        .modal-overlay.show .modal {
+            transform: scale(1);
+        }
+        
+        .modal-header {
+            padding: 1.5rem;
+            border-bottom: 1px solid #e1e8ed;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        
+        .modal-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+        }
+        
+        .modal-close {
+            border: none;
+            background: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: #626f86;
+            padding: 0.25rem;
+            border-radius: 0.25rem;
+        }
+        
+        .modal-close:hover {
+            background: #f6f8fa;
+        }
+        
+        .modal-body {
+            padding: 1.5rem;
+        }
+        
+        /* Toast */
+        .toast {
+            position: fixed;
+            bottom: 1rem;
+            right: 1rem;
+            background: #151b26;
+            color: white;
+            padding: 0.75rem 1rem;
+            border-radius: 0.375rem;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            z-index: 1001;
+            transform: translateY(100px);
+            opacity: 0;
+            transition: all 0.3s;
+        }
+        
+        .toast.show {
             transform: translateY(0);
+            opacity: 1;
+        }
+        
+        .toast.error {
+            background: #c62828;
+        }
+        
+        .toast.success {
+            background: #2e7d32;
+        }
+        
+        /* Utility Classes */
+        .hidden {
+            display: none !important;
+        }
+        
+        .text-center {
+            text-align: center;
+        }
+        
+        .text-muted {
+            color: #626f86;
+        }
+        
+        .mt-1 { margin-top: 0.25rem; }
+        .mt-2 { margin-top: 0.5rem; }
+        .mb-1 { margin-bottom: 0.25rem; }
+        .mb-2 { margin-bottom: 0.5rem; }
+        .mb-3 { margin-bottom: 0.75rem; }
+        
+        /* Responsive */
+        @media (max-width: 768px) {
+            .main-layout {
+                flex-direction: column;
+            }
+            
+            .sidebar {
+                flex: none;
+                min-width: auto;
+            }
+            
+            .main-content {
+                min-width: auto;
+            }
+            
+            .kanban-board {
+                grid-template-columns: 1fr;
+            }
+            
+            .header-content {
+                flex-direction: column;
+                align-items: flex-start;
+            }
         }
     </style>
 </head>
-<body class="bg-gray-100 text-gray-800">
-
+<body>
     <!-- Toast Notification -->
-    <div id="toast" class="toast fixed bottom-5 right-5 bg-gray-800 text-white px-6 py-3 rounded-lg shadow-xl transform translate-y-10">
+    <div id="toast" class="toast">
         <p id="toast-message">Task saved!</p>
     </div>
 
     <!-- Hidden file input for CSV import -->
     <input type="file" id="csv-file-input" class="hidden" accept=".csv">
 
-    <div class="container mx-auto p-4 md:p-8">
-        <!-- Header -->
-        <header class="flex flex-col md:flex-row justify-between items-center mb-8 pb-4 border-b border-gray-300">
-            <div>
-                <h1 class="text-3xl font-bold text-gray-900">My Task Manager</h1>
-                <p class="text-gray-600 mt-1">Capture, organize, and execute your tasks.</p>
-                <p id="user-id-display" class="text-xs text-gray-500 mt-2 font-mono"></p>
+    <!-- Task Detail Modal -->
+    <div id="task-modal" class="modal-overlay">
+        <div class="modal">
+            <div class="modal-header">
+                <h3 class="modal-title">Task Details</h3>
+                <button class="modal-close" onclick="closeTaskModal()">&times;</button>
             </div>
-            <div class="mt-4 md:mt-0 flex items-center space-x-2">
-                 <button id="import-csv-btn" class="bg-white border border-gray-300 hover:bg-gray-100 text-gray-800 font-bold py-2 px-4 rounded-lg transition-colors shadow">
-                    Import from CSV
-                </button>
-                 <button id="export-csv-btn" class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-lg transition-colors shadow">
-                    Export to CSV
-                </button>
-            </div>
-        </header>
-
-        <div class="flex flex-col lg:flex-row gap-8">
-            <!-- Left Column: Add Task Form -->
-            <div class="lg:w-1/3">
-                <div class="bg-white p-6 rounded-xl shadow-lg">
-                    <h2 class="text-2xl font-semibold mb-4">Add a New Task</h2>
-                    <form id="add-task-form" class="space-y-4">
-                        <div>
-                            <label for="task-title" class="block text-sm font-medium text-gray-700">Task Title</label>
-                            <input type="text" id="task-title" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500" placeholder="e.g., Analyze LP" required>
-                        </div>
-                        <div>
-                            <label for="task-priority" class="block text-sm font-medium text-gray-700">Priority</label>
-                            <select id="task-priority" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+            <div class="modal-body">
+                <form id="task-detail-form">
+                    <input type="hidden" id="modal-task-id">
+                    <div class="form-group">
+                        <label class="form-label" for="modal-task-title">Task Title</label>
+                        <input type="text" id="modal-task-title" class="form-input" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="modal-task-description">Description</label>
+                        <textarea id="modal-task-description" class="form-textarea" placeholder="Add a description..."></textarea>
+                    </div>
+                    <div style="display: flex; gap: 1rem;">
+                        <div class="form-group" style="flex: 1;">
+                            <label class="form-label" for="modal-task-priority">Priority</label>
+                            <select id="modal-task-priority" class="form-select">
                                 <option value="High">High</option>
-                                <option value="Medium" selected>Medium</option>
+                                <option value="Medium">Medium</option>
                                 <option value="Low">Low</option>
                             </select>
                         </div>
-                        <div>
-                            <label for="task-tags" class="block text-sm font-medium text-gray-700">Tags (comma-separated)</label>
-                            <input type="text" id="task-tags" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500" placeholder="e.g., Pharma, E-Com">
+                        <div class="form-group" style="flex: 1;">
+                            <label class="form-label" for="modal-task-status">Status</label>
+                            <select id="modal-task-status" class="form-select">
+                                <option value="Backlog">Backlog</option>
+                                <option value="In Progress">In Progress</option>
+                                <option value="Done">Done</option>
+                            </select>
                         </div>
-                        <div>
-                            <label for="task-due-date" class="block text-sm font-medium text-gray-700">Due Date</label>
-                            <input type="date" id="task-due-date" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="modal-task-tags">Tags (comma-separated)</label>
+                        <input type="text" id="modal-task-tags" class="form-input" placeholder="e.g., Design, Frontend, Urgent">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="modal-task-due-date">Due Date</label>
+                        <input type="date" id="modal-task-due-date" class="form-input">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="modal-task-project">Project</label>
+                        <select id="modal-task-project" class="form-select">
+                            <!-- Projects will be populated dynamically -->
+                        </select>
+                    </div>
+                    <div style="display: flex; gap: 0.5rem; justify-content: flex-end; margin-top: 1.5rem;">
+                        <button type="button" class="btn btn-secondary" onclick="closeTaskModal()">Cancel</button>
+                        <button type="submit" class="btn btn-primary">Save Changes</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Header -->
+    <div class="header">
+        <div class="container">
+            <div class="header-content">
+                <div>
+                    <h1>Asana Clone</h1>
+                    <p>Personal task management made simple</p>
+                    <p id="user-id-display" class="text-muted" style="font-size: 0.75rem; margin-top: 0.25rem;"></p>
+                </div>
+                <div class="header-actions">
+                    <button id="import-csv-btn" class="btn btn-secondary">Import CSV</button>
+                    <button id="export-csv-btn" class="btn btn-success">Export CSV</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="main-layout">
+            <!-- Left Sidebar: Add Task Form & Projects -->
+            <div class="sidebar">
+                <!-- Project Selector -->
+                <div class="card mb-2">
+                    <div class="card-body">
+                        <h2>Projects</h2>
+                        <div class="project-selector">
+                            <div class="project-tabs" id="project-tabs">
+                                <button class="project-tab active" data-project="personal">Personal</button>
+                                <button class="project-tab" data-project="work">Work</button>
+                                <button class="project-tab" data-project="learning">Learning</button>
+                            </div>
                         </div>
-                        <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg transition-colors shadow-md">Add Task</button>
-                    </form>
+                    </div>
+                </div>
+
+                <!-- Add Task Form -->
+                <div class="card">
+                    <div class="card-body">
+                        <h2>Add New Task</h2>
+                        <form id="add-task-form">
+                            <div class="form-group">
+                                <label class="form-label" for="task-title">Task Title</label>
+                                <input type="text" id="task-title" class="form-input" placeholder="What needs to be done?" required>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label" for="task-description">Description</label>
+                                <textarea id="task-description" class="form-textarea" placeholder="Add more details..."></textarea>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label" for="task-priority">Priority</label>
+                                <select id="task-priority" class="form-select">
+                                    <option value="High">High Priority</option>
+                                    <option value="Medium" selected>Medium Priority</option>
+                                    <option value="Low">Low Priority</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label" for="task-tags">Tags</label>
+                                <input type="text" id="task-tags" class="form-input" placeholder="frontend, design, urgent">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label" for="task-due-date">Due Date</label>
+                                <input type="date" id="task-due-date" class="form-input">
+                            </div>
+                            <button type="submit" class="btn btn-primary" style="width: 100%;">Add Task</button>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Search and Filter -->
+                <div class="card" style="margin-top: 1rem;">
+                    <div class="card-body">
+                        <h2>Search & Filter</h2>
+                        <div class="form-group">
+                            <input type="text" id="search-input" class="form-input" placeholder="Search tasks...">
+                        </div>
+                        <div class="form-group" style="margin-bottom: 0;">
+                            <select id="filter-priority" class="form-select">
+                                <option value="">All Priorities</option>
+                                <option value="High">High Priority</option>
+                                <option value="Medium">Medium Priority</option>
+                                <option value="Low">Low Priority</option>
+                            </select>
+                        </div>
+                    </div>
                 </div>
             </div>
 
-            <!-- Right Column: Task Views -->
-            <div class="lg:w-2/3">
-                <div>
+            <!-- Main Content: Task Views -->
+            <div class="main-content">
+                <div class="card">
                     <!-- Tabs -->
-                    <div class="border-b border-gray-200">
-                        <nav class="-mb-px flex space-x-8" aria-label="Tabs">
-                            <button id="tab-kanban" class="tab-btn whitespace-nowrap py-4 px-1 border-b-2 font-medium text-lg border-blue-500 text-blue-600">Kanban Board</button>
-                            <button id="tab-list" class="tab-btn whitespace-nowrap py-4 px-1 border-b-2 font-medium text-lg border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300">Task List</button>
-                        </nav>
+                    <div class="tabs">
+                        <div class="tab-nav">
+                            <button id="tab-kanban" class="tab-btn active">Board</button>
+                            <button id="tab-list" class="tab-btn">List</button>
+                        </div>
                     </div>
 
                     <!-- Kanban View -->
-                    <div id="kanban-view" class="tab-content mt-6">
-                        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                            <div class="bg-gray-200 p-4 rounded-lg kanban-column" data-status="Backlog">
-                                <h3 class="font-bold text-lg mb-4 text-gray-700">Backlog</h3>
-                                <div id="kanban-backlog" class="space-y-4"></div>
+                    <div id="kanban-view" class="tab-content active">
+                        <div class="kanban-board">
+                            <div class="kanban-column" data-status="Backlog">
+                                <div class="kanban-header">
+                                    <span>📋 Backlog</span>
+                                    <span class="task-count" id="backlog-count">0</span>
+                                </div>
+                                <div id="kanban-backlog" class="kanban-tasks"></div>
                             </div>
-                            <div class="bg-gray-200 p-4 rounded-lg kanban-column" data-status="In Progress">
-                                <h3 class="font-bold text-lg mb-4 text-gray-700">In Progress</h3>
-                                <div id="kanban-inprogress" class="space-y-4"></div>
+                            <div class="kanban-column" data-status="In Progress">
+                                <div class="kanban-header">
+                                    <span>🔄 In Progress</span>
+                                    <span class="task-count" id="progress-count">0</span>
+                                </div>
+                                <div id="kanban-inprogress" class="kanban-tasks"></div>
                             </div>
-                            <div class="bg-gray-200 p-4 rounded-lg kanban-column" data-status="Done">
-                                <h3 class="font-bold text-lg mb-4 text-gray-700">Done</h3>
-                                <div id="kanban-done" class="space-y-4"></div>
+                            <div class="kanban-column" data-status="Done">
+                                <div class="kanban-header">
+                                    <span>✅ Done</span>
+                                    <span class="task-count" id="done-count">0</span>
+                                </div>
+                                <div id="kanban-done" class="kanban-tasks"></div>
                             </div>
                         </div>
                     </div>
 
                     <!-- List View -->
-                    <div id="list-view" class="tab-content mt-6 hidden">
-                         <div class="bg-white p-4 rounded-xl shadow-lg overflow-x-auto">
-                            <table class="w-full text-left">
+                    <div id="list-view" class="tab-content">
+                        <div class="table-container">
+                            <table class="table">
                                 <thead>
-                                    <tr class="border-b">
-                                        <th class="p-2">Title</th>
-                                        <th class="p-2">Priority</th>
-                                        <th class="p-2">Status</th>
-                                        <th class="p-2">Due Date</th>
-                                        <th class="p-2">Actions</th>
+                                    <tr>
+                                        <th>Title</th>
+                                        <th>Project</th>
+                                        <th>Priority</th>
+                                        <th>Status</th>
+                                        <th>Due Date</th>
+                                        <th>Actions</th>
                                     </tr>
-                                <thead>
+                                </thead>
                                 <tbody id="task-list-body">
                                     <!-- Tasks will be rendered here -->
                                 </tbody>
                             </table>
-                         </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -148,18 +796,15 @@
     </div>
 
     <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, signInAnonymously, onAuthStateChanged, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, doc, setDoc, onSnapshot, setLogLevel } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
-
         // --- CONFIG & STATE ---
-        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {};
-        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
         let tasks = [];
-        let db, auth, userId, tasksDocRef;
+        let currentProject = 'personal';
+        let searchQuery = '';
+        let filterPriority = '';
 
         // --- UI ELEMENTS ---
         const taskForm = document.getElementById('add-task-form');
+        const taskDetailForm = document.getElementById('task-detail-form');
         const taskListBody = document.getElementById('task-list-body');
         const kanbanBacklog = document.getElementById('kanban-backlog');
         const kanbanInProgress = document.getElementById('kanban-inprogress');
@@ -172,76 +817,70 @@
         const importCsvBtn = document.getElementById('import-csv-btn');
         const csvFileInput = document.getElementById('csv-file-input');
         const userIdDisplay = document.getElementById('user-id-display');
+        const taskModal = document.getElementById('task-modal');
+        const projectTabs = document.getElementById('project-tabs');
+        const searchInput = document.getElementById('search-input');
+        const filterPrioritySelect = document.getElementById('filter-priority');
 
-        // --- FIREBASE INITIALIZATION ---
-        async function initFirebase() {
+        // --- LOCAL STORAGE FUNCTIONS ---
+        function saveTasksToStorage() {
             try {
-                const app = initializeApp(firebaseConfig);
-                db = getFirestore(app);
-                auth = getAuth(app);
-                setLogLevel('debug');
-
-                onAuthStateChanged(auth, user => {
-                    if (user) {
-                        userId = user.uid;
-                        userIdDisplay.textContent = `User ID: ${userId}`;
-                        console.log("User is signed in with UID:", userId);
-                        tasksDocRef = doc(db, "artifacts", appId, "users", userId, "task-manager", "taskList");
-                        setupSnapshotListener();
-                    } else {
-                        console.log("User is signed out.");
-                        userIdDisplay.textContent = "Not signed in.";
-                    }
-                });
-
-                if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
-                    await signInWithCustomToken(auth, __initial_auth_token);
-                } else {
-                    await signInAnonymously(auth);
-                }
+                localStorage.setItem('asana-clone-tasks', JSON.stringify(tasks));
+                showToast('Tasks saved locally!');
             } catch (error) {
-                console.error("Firebase initialization failed:", error);
-                showToast("Error connecting to the cloud.", "error");
+                console.error('Error saving tasks:', error);
+                showToast('Failed to save tasks', 'error');
             }
         }
 
-        function setupSnapshotListener() {
-            if (!tasksDocRef) return;
-            onSnapshot(tasksDocRef, (doc) => {
-                if (doc.exists()) {
-                    const data = doc.data();
-                    tasks = data.tasks || [];
-                    console.log("Tasks loaded from Firestore:", tasks);
+        function loadTasksFromStorage() {
+            try {
+                const savedTasks = localStorage.getItem('asana-clone-tasks');
+                if (savedTasks) {
+                    tasks = JSON.parse(savedTasks);
                 } else {
-                    console.log("No existing tasks document. Creating one.");
                     // Pre-populate with example tasks for first-time users
                     tasks = [
-                        { id: `task-${Date.now()}-1`, title: 'Analyze LP', priority: 'High', tags: ['Analyst', 'Pharma'], dueDate: '', status: 'Backlog' },
-                        { id: `task-${Date.now()}-2`, title: 'Ask E-Com to make a banner', priority: 'Medium', tags: ['E-Com', 'Marketing'], dueDate: '', status: 'Backlog' }
+                        { 
+                            id: `task-${Date.now()}-1`, 
+                            title: 'Design new dashboard', 
+                            description: 'Create wireframes and mockups for the new user dashboard interface',
+                            priority: 'High', 
+                            tags: ['Design', 'UI/UX'], 
+                            dueDate: '', 
+                            status: 'Backlog',
+                            project: 'work',
+                            createdAt: new Date().toISOString()
+                        },
+                        { 
+                            id: `task-${Date.now()}-2`, 
+                            title: 'Learn React hooks', 
+                            description: 'Complete the React hooks tutorial and build a small project',
+                            priority: 'Medium', 
+                            tags: ['Learning', 'React'], 
+                            dueDate: '', 
+                            status: 'Backlog',
+                            project: 'learning',
+                            createdAt: new Date().toISOString()
+                        },
+                        { 
+                            id: `task-${Date.now()}-3`, 
+                            title: 'Grocery shopping', 
+                            description: 'Buy vegetables, fruits, and household items',
+                            priority: 'Low', 
+                            tags: ['Personal', 'Shopping'], 
+                            dueDate: '', 
+                            status: 'Backlog',
+                            project: 'personal',
+                            createdAt: new Date().toISOString()
+                        }
                     ];
-                    saveTasksToFirestore(false); // Don't show toast on initial creation
+                    saveTasksToStorage();
                 }
                 renderAll();
-            }, (error) => {
-                console.error("Error with snapshot listener:", error);
-                showToast("Error listening for real-time updates.", "error");
-            });
-        }
-        
-        async function saveTasksToFirestore(showSuccessToast = true) {
-            if (!tasksDocRef) {
-                showToast("Cannot save: Not connected.", "error");
-                return;
-            }
-            try {
-                await setDoc(tasksDocRef, { tasks: tasks });
-                console.log("Tasks saved to Firestore.");
-                if (showSuccessToast) {
-                    showToast("Progress saved to the cloud!");
-                }
             } catch (error) {
-                console.error("Error saving tasks to Firestore:", error);
-                showToast("Failed to save tasks.", "error");
+                console.error('Error loading tasks:', error);
+                tasks = [];
             }
         }
 
@@ -250,24 +889,36 @@
         function renderAll() {
             renderListView();
             renderKanbanView();
+            updateTaskCounts();
         }
 
         function renderListView() {
             taskListBody.innerHTML = '';
-            if (tasks.length === 0) {
-                taskListBody.innerHTML = '<tr><td colspan="5" class="text-center p-4 text-gray-500">No tasks yet. Add one!</td></tr>';
+            const filteredTasks = getFilteredTasks();
+            
+            if (filteredTasks.length === 0) {
+                taskListBody.innerHTML = '<tr><td colspan="6" class="text-center" style="padding: 2rem; color: #626f86;">No tasks in this project yet. Add one to get started!</td></tr>';
                 return;
             }
-            tasks.forEach(task => {
+            
+            filteredTasks.forEach(task => {
                 const row = document.createElement('tr');
-                row.className = 'border-b hover:bg-gray-50';
                 row.innerHTML = `
-                    <td class="p-3">${task.title}</td>
-                    <td class="p-3"><span class="px-2 py-1 text-xs font-semibold rounded-full ${getPriorityClass(task.priority)}">${task.priority}</span></td>
-                    <td class="p-3">${task.status}</td>
-                    <td class="p-3">${task.dueDate || 'N/A'}</td>
-                    <td class="p-3">
-                        <button class="delete-btn text-red-500 hover:text-red-700" data-id="${task.id}">Delete</button>
+                    <td style="padding: 0.75rem;">
+                        <div style="font-weight: 600;">${task.title}</div>
+                        ${task.description ? `<div style="font-size: 0.875rem; color: #626f86; margin-top: 0.25rem;">${task.description.substring(0, 50)}${task.description.length > 50 ? '...' : ''}</div>` : ''}
+                    </td>
+                    <td style="padding: 0.75rem;">
+                        <span style="background: #e3f2fd; color: #1565c0; padding: 0.125rem 0.5rem; border-radius: 0.25rem; font-size: 0.75rem; font-weight: 500;">${task.project}</span>
+                    </td>
+                    <td style="padding: 0.75rem;">
+                        <span class="task-priority priority-${task.priority.toLowerCase()}">${task.priority}</span>
+                    </td>
+                    <td style="padding: 0.75rem;">${task.status}</td>
+                    <td style="padding: 0.75rem;">${task.dueDate || 'No due date'}</td>
+                    <td style="padding: 0.75rem;">
+                        <button class="task-action-btn" onclick="openTaskModal('${task.id}')">Edit</button>
+                        <button class="task-action-btn delete" onclick="deleteTask('${task.id}')">Delete</button>
                     </td>
                 `;
                 taskListBody.appendChild(row);
@@ -279,18 +930,27 @@
             kanbanInProgress.innerHTML = '';
             kanbanDone.innerHTML = '';
 
-            tasks.forEach(task => {
+            const filteredTasks = getFilteredTasks();
+            
+            filteredTasks.forEach(task => {
                 const taskCard = document.createElement('div');
                 taskCard.id = task.id;
-                taskCard.className = `task-card bg-white p-4 rounded-lg shadow priority-${task.priority.toLowerCase()}`;
+                taskCard.className = 'task-card';
                 taskCard.draggable = true;
                 taskCard.innerHTML = `
-                    <h4 class="font-bold">${task.title}</h4>
-                    <div class="flex flex-wrap gap-2 my-2">
-                        ${(task.tags || []).map(tag => `<span class="bg-blue-100 text-blue-800 text-xs font-semibold px-2 py-1 rounded-full">${tag}</span>`).join('')}
+                    <div class="task-title">${task.title}</div>
+                    ${task.description ? `<div class="task-description">${task.description.substring(0, 100)}${task.description.length > 100 ? '...' : ''}</div>` : ''}
+                    <div class="task-meta">
+                        <div class="task-tags">
+                            ${(task.tags || []).map(tag => `<span class="task-tag">${tag}</span>`).join('')}
+                        </div>
+                        <span class="task-priority priority-${task.priority.toLowerCase()}">${task.priority}</span>
                     </div>
-                    <p class="text-sm text-gray-500">Due: ${task.dueDate || 'N/A'}</p>
-                    <button class="delete-btn text-xs text-red-500 hover:text-red-700 mt-2" data-id="${task.id}">Delete</button>
+                    ${task.dueDate ? `<div class="task-due-date">Due: ${task.dueDate}</div>` : ''}
+                    <div class="task-actions">
+                        <button class="task-action-btn" onclick="openTaskModal('${task.id}')">Edit</button>
+                        <button class="task-action-btn delete" onclick="deleteTask('${task.id}')">Delete</button>
+                    </div>
                 `;
 
                 if (task.status === 'Backlog') kanbanBacklog.appendChild(taskCard);
@@ -298,50 +958,158 @@
                 else if (task.status === 'Done') kanbanDone.appendChild(taskCard);
             });
         }
+
+        function getFilteredTasks() {
+            let filteredTasks = tasks.filter(task => task.project === currentProject);
+            
+            // Apply search filter
+            if (searchQuery) {
+                filteredTasks = filteredTasks.filter(task => 
+                    task.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                    (task.description && task.description.toLowerCase().includes(searchQuery.toLowerCase())) ||
+                    (task.tags && task.tags.some(tag => tag.toLowerCase().includes(searchQuery.toLowerCase())))
+                );
+            }
+            
+            // Apply priority filter
+            if (filterPriority) {
+                filteredTasks = filteredTasks.filter(task => task.priority === filterPriority);
+            }
+            
+            return filteredTasks;
+        }
+
+        function updateTaskCounts() {
+            const filteredTasks = getFilteredTasks();
+            const backlogCount = filteredTasks.filter(t => t.status === 'Backlog').length;
+            const progressCount = filteredTasks.filter(t => t.status === 'In Progress').length;
+            const doneCount = filteredTasks.filter(t => t.status === 'Done').length;
+            
+            document.getElementById('backlog-count').textContent = backlogCount;
+            document.getElementById('progress-count').textContent = progressCount;
+            document.getElementById('done-count').textContent = doneCount;
+        }
         
         // --- TASK MANIPULATION ---
         function addTask(e) {
             e.preventDefault();
-            const title = document.getElementById('task-title').value;
+            const title = document.getElementById('task-title').value.trim();
+            const description = document.getElementById('task-description').value.trim();
             const priority = document.getElementById('task-priority').value;
             const tags = document.getElementById('task-tags').value.split(',').map(tag => tag.trim()).filter(Boolean);
             const dueDate = document.getElementById('task-due-date').value;
 
+            if (!title) {
+                showToast('Please enter a task title', 'error');
+                return;
+            }
+
             const newTask = {
                 id: `task-${Date.now()}`,
                 title,
+                description,
                 priority,
                 tags,
                 dueDate,
-                status: 'Backlog'
+                status: 'Backlog',
+                project: currentProject,
+                createdAt: new Date().toISOString()
             };
 
             tasks.push(newTask);
-            saveTasksToFirestore();
+            saveTasksToStorage();
             taskForm.reset();
+            showToast('Task added successfully!');
+        }
+
+        function updateTask(taskData) {
+            const taskIndex = tasks.findIndex(t => t.id === taskData.id);
+            if (taskIndex !== -1) {
+                tasks[taskIndex] = { ...tasks[taskIndex], ...taskData };
+                saveTasksToStorage();
+                renderAll(); // Re-render to show changes immediately
+                showToast('Task updated successfully!');
+            }
         }
 
         function deleteTask(id) {
+            if (!confirm('Are you sure you want to delete this task?')) return;
+            
             tasks = tasks.filter(task => task.id !== id);
-            saveTasksToFirestore();
+            saveTasksToStorage();
+            renderAll(); // Re-render to show changes immediately
+            showToast('Task deleted successfully!');
         }
 
         function updateTaskStatus(id, newStatus) {
             const task = tasks.find(t => t.id === id);
             if (task) {
                 task.status = newStatus;
-                saveTasksToFirestore();
+                saveTasksToStorage();
+                renderAll(); // Re-render to show changes immediately
+                showToast(`Task moved to ${newStatus}!`);
             }
+        }
+
+        // --- MODAL FUNCTIONS ---
+        function openTaskModal(taskId = null) {
+            const modal = document.getElementById('task-modal');
+            const form = document.getElementById('task-detail-form');
+            
+            if (taskId) {
+                const task = tasks.find(t => t.id === taskId);
+                if (task) {
+                    document.getElementById('modal-task-id').value = task.id;
+                    document.getElementById('modal-task-title').value = task.title;
+                    document.getElementById('modal-task-description').value = task.description || '';
+                    document.getElementById('modal-task-priority').value = task.priority;
+                    document.getElementById('modal-task-status').value = task.status;
+                    document.getElementById('modal-task-tags').value = (task.tags || []).join(', ');
+                    document.getElementById('modal-task-due-date').value = task.dueDate || '';
+                    document.getElementById('modal-task-project').value = task.project;
+                }
+            } else {
+                form.reset();
+                document.getElementById('modal-task-project').value = currentProject;
+            }
+            
+            // Populate project dropdown
+            const projectSelect = document.getElementById('modal-task-project');
+            projectSelect.innerHTML = `
+                <option value="personal">Personal</option>
+                <option value="work">Work</option>
+                <option value="learning">Learning</option>
+            `;
+            
+            modal.classList.add('show');
+        }
+
+        function closeTaskModal() {
+            document.getElementById('task-modal').classList.remove('show');
+        }
+
+        // --- PROJECT MANAGEMENT ---
+        function switchProject(project) {
+            currentProject = project;
+            
+            // Update active tab
+            document.querySelectorAll('.project-tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            document.querySelector(`[data-project="${project}"]`).classList.add('active');
+            
+            renderAll(); // Re-render for new project
         }
         
         function exportToCSV() {
-            if (tasks.length === 0) {
-                showToast("No tasks to export.", "error");
+            const filteredTasks = getFilteredTasks();
+            if (filteredTasks.length === 0) {
+                showToast("No tasks to export in this project.", "error");
                 return;
             }
-            const headers = "ID,Title,Priority,Status,DueDate,Tags\n";
-            const rows = tasks.map(task => 
-                `"${task.id}","${task.title}","${task.priority}","${task.status}","${task.dueDate || ''}","${(task.tags || []).join(';')}"`
+            const headers = "ID,Title,Description,Priority,Status,DueDate,Tags,Project,CreatedAt\n";
+            const rows = filteredTasks.map(task => 
+                `"${task.id}","${task.title}","${task.description || ''}","${task.priority}","${task.status}","${task.dueDate || ''}","${(task.tags || []).join(';')}","${task.project}","${task.createdAt || ''}"`
             ).join("\n");
 
             const csvContent = headers + rows;
@@ -350,11 +1118,12 @@
             if (link.download !== undefined) {
                 const url = URL.createObjectURL(blob);
                 link.setAttribute("href", url);
-                link.setAttribute("download", "tasks.csv");
+                link.setAttribute("download", `${currentProject}-tasks.csv`);
                 link.style.visibility = 'hidden';
                 document.body.appendChild(link);
                 link.click();
                 document.body.removeChild(link);
+                showToast(`${currentProject} tasks exported successfully!`);
             }
         }
         
@@ -381,30 +1150,66 @@
 
         function parseCSV(text) {
             const lines = text.split(/\r\n|\n/);
-            const headers = lines[0].split(',').map(h => h.trim());
+            const headers = lines[0].split(',').map(h => h.trim().replace(/"/g, ''));
             const tasksArr = [];
-            const headerMap = {
-                id: 'ID',
-                title: 'Title',
-                priority: 'Priority',
-                status: 'Status',
-                dueDate: 'DueDate',
-                tags: 'Tags'
-            };
 
             for (let i = 1; i < lines.length; i++) {
-                if (!lines[i]) continue;
-                const values = lines[i].split('","').map(v => v.replace(/"/g, ''));
+                if (!lines[i].trim()) continue;
                 
-                let task = {};
-                task.id = values[headers.indexOf(headerMap.id)];
-                task.title = values[headers.indexOf(headerMap.title)];
-                task.priority = values[headers.indexOf(headerMap.priority)];
-                task.status = values[headers.indexOf(headerMap.status)];
-                task.dueDate = values[headers.indexOf(headerMap.dueDate)];
-                const tagsStr = values[headers.indexOf(headerMap.tags)];
-                task.tags = tagsStr ? tagsStr.split(';') : [];
-                tasksArr.push(task);
+                const values = [];
+                let current = '';
+                let inQuotes = false;
+                
+                for (let j = 0; j < lines[i].length; j++) {
+                    const char = lines[i][j];
+                    if (char === '"') {
+                        inQuotes = !inQuotes;
+                    } else if (char === ',' && !inQuotes) {
+                        values.push(current);
+                        current = '';
+                    } else {
+                        current += char;
+                    }
+                }
+                values.push(current); // Don't forget the last value
+                
+                const task = {};
+                headers.forEach((header, index) => {
+                    const value = values[index] || '';
+                    switch (header.toLowerCase()) {
+                        case 'id':
+                            task.id = value;
+                            break;
+                        case 'title':
+                            task.title = value;
+                            break;
+                        case 'description':
+                            task.description = value;
+                            break;
+                        case 'priority':
+                            task.priority = value || 'Medium';
+                            break;
+                        case 'status':
+                            task.status = value || 'Backlog';
+                            break;
+                        case 'duedate':
+                            task.dueDate = value;
+                            break;
+                        case 'tags':
+                            task.tags = value ? value.split(';') : [];
+                            break;
+                        case 'project':
+                            task.project = value || currentProject;
+                            break;
+                        case 'createdat':
+                            task.createdAt = value;
+                            break;
+                    }
+                });
+                
+                if (task.title) { // Only add tasks with titles
+                    tasksArr.push(task);
+                }
             }
             return tasksArr;
         }
@@ -418,20 +1223,13 @@
         }
 
         // --- HELPERS ---
-        function getPriorityClass(priority) {
-            switch (priority) {
-                case 'High': return 'bg-red-100 text-red-800';
-                case 'Medium': return 'bg-orange-100 text-orange-800';
-                case 'Low': return 'bg-blue-100 text-blue-800';
-                default: return 'bg-gray-100 text-gray-800';
-            }
-        }
-
         function showToast(message, type = "success") {
             const toast = document.getElementById("toast");
             const toastMessage = document.getElementById("toast-message");
             toastMessage.textContent = message;
-            toast.className = `toast show fixed bottom-5 right-5 text-white px-6 py-3 rounded-lg shadow-xl transform translate-y-10 ${type === 'error' ? 'bg-red-600' : 'bg-gray-800'}`;
+            
+            toast.className = `toast show ${type}`;
+            
             setTimeout(() => {
                 toast.classList.remove("show");
             }, 3000);
@@ -440,47 +1238,86 @@
         // --- EVENT LISTENERS ---
         taskForm.addEventListener('submit', addTask);
         
-        document.body.addEventListener('click', e => {
-            if (e.target.classList.contains('delete-btn')) {
-                // Using a simple confirm dialog for now. A custom modal would be better.
-                if(window.confirm("Are you sure you want to delete this task?")){
-                    deleteTask(e.target.dataset.id);
-                }
+        taskDetailForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const taskId = document.getElementById('modal-task-id').value;
+            const taskData = {
+                id: taskId,
+                title: document.getElementById('modal-task-title').value.trim(),
+                description: document.getElementById('modal-task-description').value.trim(),
+                priority: document.getElementById('modal-task-priority').value,
+                status: document.getElementById('modal-task-status').value,
+                tags: document.getElementById('modal-task-tags').value.split(',').map(tag => tag.trim()).filter(Boolean),
+                dueDate: document.getElementById('modal-task-due-date').value,
+                project: document.getElementById('modal-task-project').value
+            };
+            
+            if (!taskData.title) {
+                showToast('Please enter a task title', 'error');
+                return;
             }
+            
+            updateTask(taskData);
+            closeTaskModal();
+        });
+        
+        // Project tabs
+        projectTabs.addEventListener('click', (e) => {
+            if (e.target.classList.contains('project-tab')) {
+                switchProject(e.target.dataset.project);
+            }
+        });
+
+        // Search and filter
+        searchInput.addEventListener('input', (e) => {
+            searchQuery = e.target.value;
+            renderAll();
+        });
+
+        filterPrioritySelect.addEventListener('change', (e) => {
+            filterPriority = e.target.value;
+            renderAll();
         });
         
         // Tab switching
         tabKanban.addEventListener('click', () => {
-            kanbanView.classList.remove('hidden');
-            listView.classList.add('hidden');
-            tabKanban.className = 'tab-btn whitespace-nowrap py-4 px-1 border-b-2 font-medium text-lg border-blue-500 text-blue-600';
-            tabList.className = 'tab-btn whitespace-nowrap py-4 px-1 border-b-2 font-medium text-lg border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300';
+            kanbanView.classList.add('active');
+            listView.classList.remove('active');
+            tabKanban.classList.add('active');
+            tabList.classList.remove('active');
         });
 
         tabList.addEventListener('click', () => {
-            kanbanView.classList.add('hidden');
-            listView.classList.remove('hidden');
-            tabList.className = 'tab-btn whitespace-nowrap py-4 px-1 border-b-2 font-medium text-lg border-blue-500 text-blue-600';
-            tabKanban.className = 'tab-btn whitespace-nowrap py-4 px-1 border-b-2 font-medium text-lg border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300';
+            kanbanView.classList.remove('active');
+            listView.classList.add('active');
+            tabList.classList.add('active');
+            tabKanban.classList.remove('active');
         });
         
         exportCsvBtn.addEventListener('click', exportToCSV);
         importCsvBtn.addEventListener('click', () => csvFileInput.click());
         csvFileInput.addEventListener('change', handleCsvImport);
 
+        // Modal click outside to close
+        document.getElementById('task-modal').addEventListener('click', (e) => {
+            if (e.target.classList.contains('modal-overlay')) {
+                closeTaskModal();
+            }
+        });
+
         // Drag and Drop
         let draggedItemId = null;
         document.addEventListener('dragstart', e => {
             if (e.target.classList.contains('task-card')) {
                 draggedItemId = e.target.id;
-                e.target.style.opacity = '0.5';
+                e.target.classList.add('dragging');
             }
         });
 
         document.addEventListener('dragend', e => {
             if (e.target.classList.contains('task-card')) {
                 draggedItemId = null;
-                e.target.style.opacity = '1';
+                e.target.classList.remove('dragging');
             }
         });
         
@@ -497,8 +1334,14 @@
             }
         });
 
+        // Make these functions globally available
+        window.openTaskModal = openTaskModal;
+        window.closeTaskModal = closeTaskModal;
+        window.deleteTask = deleteTask;
+
         // --- INITIALIZATION ---
-        initFirebase();
+        userIdDisplay.textContent = "Local Storage Mode";
+        loadTasksFromStorage();
     </script>
 </body>
 </html>
